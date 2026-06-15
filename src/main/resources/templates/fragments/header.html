@@ -1,0 +1,46 @@
+<!-- templates/fragments/header.html -->
+<div th:fragment="header">
+  <div id="siteWrap">
+    <div id="globalHeaderWrap">
+      <header id="globalHeader">
+        <h1 id="siteName">
+          <a href="/" title="SeichiGo">
+          <img src="/images/LOGO.png" alt="SeichiGo" style="height: 60px; width: auto;" />
+          </a>
+        </h1>
+
+        <!-- 여기서 nav는 ul 밖에 있어야 함 -->
+        <nav class="top_right" id="globalHeaderMenu">
+          <ul>
+           <li><a href="/anime/seichi-list"> 
+           <img src="/images/hitori.png" alt="聖地" class="menu-icon"/> 聖地リスト</a></li>
+            
+            <li><a href="/creatorlist.do">
+            <img src="/images/kita.png" alt="クリエイター" class="menu-icon"/>クリエイター</a></li>
+            
+            <li><a href="/products">
+            <img src="/images/nijika.png" alt="グッズ" class="menu-icon"/>グッズ</a></li>
+
+            <!-- 비로그인 상태 -->
+            <th:block th:if="${#authorization.expression('isAnonymous()')}">
+              <li><a th:href="@{/user/login}">
+              <img src="/images/ryo.png" alt="ログイン" class="menu-icon"/>ログイン</a></li>
+              
+              <li><a th:href="@{/user/register}">
+              <img src="/images/bocchipre.png" alt="新規登録" class="menu-icon"/>新規登録</a></li>
+            </th:block>
+
+            <!-- 로그인한 사용자 -->
+            <th:block th:if="${#authorization.expression('isAuthenticated()')}">
+              <li><a th:href="@{/logout}">
+              <img src="/images/azusa.jpg" alt="ログアウト" class="menu-icon"/>ログアウト</a></li>
+             
+              <li><a th:href="@{/mypage}">
+              <img src="/images/bocchicamp.jpg" alt="マイページ" class="menu-icon"/>マイページ</a></li>
+            </th:block>
+          </ul>
+        </nav>
+      </header>
+    </div>
+  </div>
+</div>

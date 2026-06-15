@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>SeichiGo - 聖地巡礼情報</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <style>
+    #mainVisual .swiper { width: 80%; height: 400px; }
+    #mainVisual .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+  .swiper-caption {
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+    background: rgba(0, 0, 0, 0.5); /* 더 어두운 반투명 배경 */
+    color: white;
+    padding: 30px 25px;
+    border-radius: 10px;
+    max-width: 600px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease-out;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+  }
+
+  .swiper-caption h2 {
+    font-size: 30px;
+    margin-bottom: 15px;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px black; /* 글자에 그림자 추가 */
+  }
+
+  .swiper-caption .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #ff6f61;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  .swiper-caption .btn:hover {
+    background-color: #e65b50;
+  }
+
+  .swiper-slide-active .swiper-caption {
+    opacity: 1;
+    transform: translateY(0);
+  }
+ </style>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <section id="mainVisual">
+      <div class="swiper main-slider">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <img src="/images/kiminonama.png" alt="君の名は">
+            <div class="swiper-caption">
+              <h2>あなたの“好き”が巡礼になる。</h2>
+              <a th:href="@{/seichi-list}" class="btn">聖地リストを見る</a>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <img src="/images/sezani.jpg" alt="슬라이드2">
+             <div class="swiper-caption">
+              <h2>あなたの“好き”が巡礼になる。</h2>
+              <a href="/seichi-list" class="btn">聖地リストを見る</a>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <img src="/images/asya.jpg" alt="슬라이드3">
+             <div class="swiper-caption">
+              <h2>あなたの“好き”が巡礼になる。</h2>
+              <a href="/seichi-list" class="btn">聖地リストを見る</a>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 아래 부분 layout.html에서 삽입됨 -->
+  <th:block layout:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper('.main-slider', {
+        loop: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev'
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true
+        },
+        on: {
+          slideChangeTransitionStart: function () {
+            document.querySelectorAll('.swiper-caption').forEach(el => {
+              el.style.opacity = '0';
+              el.style.transform = 'translateY(20px)';
+            });
+          },
+          slideChangeTransitionEnd: function () {
+            const active = document.querySelector('.swiper-slide-active .swiper-caption');
+            if (active) {
+              active.style.opacity = '1';
+              active.style.transform = 'translateY(0px)';
+            }
+          }
+        }
+      });
+    </script>
+  </th:block>
+</body>
+</html>

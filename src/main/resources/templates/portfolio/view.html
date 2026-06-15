@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${vo.title}">作品詳細</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <h2 th:text="${vo.title}">タイトル</h2>
+  <img th:src="@{'/upload/' + ${vo.thumbnail}}" style="width:300px; height:auto;">
+  <p><strong>説明:</strong> <span th:text="${vo.description}"></span></p>
+  <p><strong>公開年:</strong> <span th:text="${vo.release_year}"></span></p>
+
+  <h3>聖地マップ</h3>
+  <div id="map" style="width:100%; height:400px;"></div>
+
+  <script>
+    function initMap() {
+      const location = { lat: 35.685175, lng: 139.7528 }; // 예: 도쿄
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 14,
+        center: location
+      });
+      new google.maps.Marker({
+        position: location,
+        map: map
+      });
+    }
+    window.onload = initMap;
+  </script>
+</div>
+</body>
+</html>

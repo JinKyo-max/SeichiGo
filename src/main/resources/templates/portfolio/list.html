@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>アニメ聖地リスト</title>
+  <style>
+    .seichi-list-container {
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    .seichi-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .seichi-card:hover {
+      transform: translateY(-5px);
+    }
+    .seichi-card img {
+      width: 300px;
+      height: 420px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto;
+    }
+    .seichi-card h3 {
+      font-size: 20px;
+      margin: 15px 0 5px;
+    }
+    .seichi-card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .write-button {
+      text-align: right;
+      margin: 20px 40px;
+    }
+    .write-button a {
+      padding: 10px 20px;
+      background-color: #1976d2;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <h1 style="text-align: center; margin-top: 30px;">アニメ聖地リスト</h1>
+
+  <!-- 관리자만 보이는 등록 버튼 -->
+  <div class="write-button" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+    <a th:href="@{/anime/write}">作品登録</a>
+  </div>
+
+  <!-- 리스트 출력 -->
+  <div class="seichi-list-container">
+    <div class="seichi-card" th:each="vo : ${animeList}">
+	  <img th:src="@{${vo.thumbnail}}" th:alt="${vo.title}" />
+      <h3 th:text="${vo.title}">タイトル</h3>
+      <p th:text="'公開年: ' + ${vo.release_year}">2024</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

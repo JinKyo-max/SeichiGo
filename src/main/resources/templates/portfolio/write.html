@@ -1,0 +1,111 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <title>アニメ作品登録</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .form-box {
+      width: 600px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .form-box h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-box label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .form-box input, .form-box textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .form-box button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 12px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="form-box">
+    <h2>アニメ作品登録</h2>
+    <form th:action="@{/anime/write}" method="post" enctype="multipart/form-data" onsubmit="return check();">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <label for="title">タイトル</label>
+      <input type="text" name="title" id="title" />
+
+      <label for="description">説明</label>
+      <textarea name="description" id="description" rows="5"></textarea>
+
+      <label for="thumbnailFile">サムネイル画像</label>
+      <input type="file" name="thumbnailFile" id="thumbnailFile" accept="image/*" />
+
+      <label for="release_year">公開年</label>
+      <input type="number" name="release_year" id="release_year" />
+
+      <button type="submit">登録する</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function check() {
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const releaseYear = document.getElementById("release_year").value.trim();
+
+    if (title === "") {
+      alert("タイトルを入力してください。");
+      document.getElementById("title").focus();
+      return false;
+    }
+    if (description === "") {
+      alert("説明を入力してください。");
+      document.getElementById("description").focus();
+      return false;
+    }
+    if (releaseYear === "") {
+      alert("公開年を入力してください。");
+      document.getElementById("release_year").focus();
+      return false;
+    }
+
+    return true;
+  }
+
+  $(function () {
+    $(".location .dropdown > a").on("click", function (e) {
+      e.preventDefault();
+      if ($(this).next().is(":visible")) {
+        $(".location .dropdown > a").next().hide();
+      } else {
+        $(".location .dropdown > a").next().hide();
+        $(this).next().show();
+      }
+    });
+  });
+</script>
+</body>
+</html>

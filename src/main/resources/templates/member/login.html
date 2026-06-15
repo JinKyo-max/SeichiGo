@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>ログイン | SeichiGo</title>
+
+  <th:block layout:fragment="css">
+    <style>
+      .login-wrapper {
+        position: relative;
+        width: 768px;
+        height: 1152px;
+        margin: 0 auto;
+        background-image: url('/images/donguri.jpg');
+        background-size: cover;
+        background-position: center;
+      }
+
+      .login-form {
+        position: absolute;
+        top: 600px;
+        left: 180px;
+        width: 410px;
+        padding: 20px;
+        border: 3px solid #1976d2;
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.85);
+        box-sizing: border-box;
+      }
+
+      .login-form input[type="text"],
+      .login-form input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 14px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+
+      .login-form button {
+        width: 100%;
+        padding: 12px;
+        background-color: #42a5f5;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .login-form h2 {
+        display: none;
+      }
+    </style>
+  </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="login-wrapper">
+    <form class="login-form" method="post" th:action="@{/user/login}">
+      <h2>個人会員</h2>
+      <input type="text" name="username" placeholder="ユーザーID" required>
+      <input type="password" name="password" placeholder="パスワード" required>
+      <button type="submit">ログイン</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
