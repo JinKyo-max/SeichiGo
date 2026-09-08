@@ -1,7 +1,9 @@
 package com.seichigo.controller;
 
 import com.seichigo.domain.AnimeWorkVo;
+import com.seichigo.domain.SeichiPlaceVo;
 import com.seichigo.service.AnimeWorkService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,77 +23,134 @@ import java.util.UUID;
 @RequestMapping("/anime")
 public class AnimeWorkController {
 
-    private final String uploadDir = "C:/upload/"; // 이미지 저장 경로
+    private final String uploadDir = "C:/upload/"; // 이미지 저장 폴더
 
     @Autowired
     private AnimeWorkService service;
 
-    // 등록 폼
-    //브라우저에서 /anime/write 경로로 접근했을 때 등록 폼 화면을 보여줌.
+    /*** 1. 애니 작품 등록 폼 출력 ***/
     @GetMapping("/write")
     public String writeForm(Principal principal, Model model) {
         if (principal != null) {
             model.addAttribute("writer", principal.getName());
         }
-        return "portfolio/write"; // write.html을 사용할 경우
+        return "portfolio/write"; // portfolio/write.html로 이동
     }
 
-    //등록 처리
-    //write.html 폼에서 작성된 데이터를 POST 방식으로 전송하면 이 메서드가 처리함
+    /*** 2. 애니 작품 등록 처리 ***/
     @PostMapping("/write")
-    public String writeSubmit(
-            AnimeWorkVo vo,
-            @RequestParam("thumbnailFile") MultipartFile file) {
-
-        String imagePath = null;
-
+    public String writeSubmit(AnimeWorkVo vo, @RequestParam("thumbnailFile") MultipartFile file) {
         if (file != null && !file.isEmpty()) {
             try {
                 String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Path filePath = Paths.get(uploadDir + fileName);
                 Files.copy(file.getInputStream(), filePath);
-                imagePath = "/upload/" + fileName; // DB에는 경로 저장
+                vo.setThumbnail("/upload/" + fileName); // ★ DB에는 /upload/경로 포함
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        vo.setThumbnail(imagePath); // DB에 저장될 썸네일 경로
-        service.register(vo);
-
-        return "redirect:/anime/seichi-list";
-
-        // 등록 후 목록으로 이동
-        //@GetMapping("/anime/list") 를 처리하는 메서드를 다시 실행하라는 뜻
+        service.register(vo); // 서비스로 등록
+        return "redirect:/anime/list"; // 등록 후 목록으로 이동
+       //redirect 쓰는 이유 :
+        //사용자는 등록 후 GET /anime/list 를 새로 시작하므로 새로고침 시 중복 등록 방지 가능
     }
-    
-    //아니메 리스트 페이지 출력
-    @GetMapping("/seichi-list")
+
+    /*** 3. 애니 작품 목록 출력 ***/
+    @GetMapping("/list")
     public String seichiList(Model model) {
-    	//List<AnimeWorkVo> list = service.getAllWorks();
-    	//System.out.println("🔥 등록된 작품 수: " + list.size());
         model.addAttribute("animeList", service.getAllWorks());
-        return "portfolio/list";
+        return "portfolio/list"; // portfolio/list.html
     }
-    
-    //작품 클릭 시 상세페이지로 이동
+
+    /*** 4. 애니 작품 상세 페이지 출력 ***/
     @GetMapping("/view")
-    public String view(@RequestParam("id") int id, Model model) {
-        AnimeWorkVo vo = service.getWorkById(id);
-        model.addAttribute("vo", vo);
-        return "portfolio/view"; // view.html 출력
-    }
-    
-    @GetMapping("/view")
-    public String viewWork(@RequestParam("id") int id, Model model) {
+    public String viewWork(@RequestParam("work_id") int id, Model model) {
         AnimeWorkVo work = service.getWorkById(id);
-        List<SeichiPlaceVo> placeList = service.getPlacesByWorkId(id);
+        List<SeichiPlaceVo> places = service.getPlacesByWorkId(id);
+        
+     // JSON 변환
+        ObjectMapper mapper = new ObjectMapper();
+        String placesJson = "";
+        try {
+            placesJson = mapper.writeValueAsString(places);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+     //이걸 추가한 이유는,
+     //"SeichiPlaceVo 리스트 places 하나하나를 돌면서 address를 split해서, region에 세팅해주기 위해서
+     
+        //이 코드의 동작 순서
+    // places 리스트를 for문으로 하나하나 꺼낸다.
+    // address가 null이 아니면 split(" ") 으로 공백 기준으로 쪼갠다.
+    // 쪼갠 결과에서 [0]번째 (즉, 제일 앞 단어) 를 region에 저장한다.
+    // 결론: "전체 주소 중에서 첫 번째 지역명만 따로 뽑아서 place 객체의 region에 저장하는 작업이다."   
+        
+        // 지역(region) 필드 추출 처리
+        for (SeichiPlaceVo place : places) {
+            if (place.getAddress() != null && place.getAddress().contains(" ")) {
+                String[] parts = place.getAddress().split(" ");
+                place.setRegion(parts[0]); // 예: 東京都
+            }
+
+            // 위도/경도가 null이거나 문자열일 경우 대비
+            if (place.getLatitude() == null || place.getLongitude() == null) {
+                place.setLatitude(0.0);
+                place.setLongitude(0.0);
+            }
+        }
 
         model.addAttribute("work", work);
-        model.addAttribute("places", placeList);
-        return "portfolio/view";
+        model.addAttribute("places", places);
+        model.addAttribute("placesJson", placesJson);
+        return "portfolio/view"; // portfolio/view.html
     }
 
+    /*** 5. 장소 등록 폼 출력 (관리자만) ***/
+    @GetMapping("/place-write")
+    public String placeWriteForm() {
+        return "portfolio/write_place"; // portfolio/write_place.html
+    }
 
+    /*** 6. 장소 등록 처리 (관리자만) ***/
+    @PostMapping("/place-write")
+    public String placeWriteSubmit(SeichiPlaceVo vo,
+        @RequestParam("imageFile") MultipartFile imageFile,
+        @RequestParam("realimageFile") MultipartFile realImageFile) {
+
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+                Path filePath = Paths.get(uploadDir + fileName);
+                Files.copy(imageFile.getInputStream(), filePath);
+                vo.setImage("/upload/" + fileName);
+            }
+
+            if (realImageFile != null && !realImageFile.isEmpty()) {
+                String realFileName = UUID.randomUUID() + "_" + realImageFile.getOriginalFilename();
+                Path realFilePath = Paths.get(uploadDir + realFileName);
+                Files.copy(realImageFile.getInputStream(), realFilePath);
+                vo.setRealimage("/upload/" + realFileName);  
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // 에러 발생 시 등록 페이지로 다시 리다이렉트하거나 예외 처리 추가 가능
+            return "redirect:/anime/place-write?error=true";
+        }
+
+        service.registerPlace(vo);
+        return "redirect:/anime/view?work_id=" + vo.getWork_id();
+    }
+
+    /*** 7. 좌표 클릭시 상세 페이지로 이동 ***/
+    @GetMapping("/detail")
+    public String viewdetail(@RequestParam("place_id") int id, Model model) {
+        SeichiPlaceVo place = service.getPlaceById(id); // 장소 1개 조회
+        model.addAttribute("place", place);
+        return "portfolio/viewdetail";
+    }
+    
     
 }
