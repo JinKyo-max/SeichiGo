@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+// 컨트롤러와 DB의 중간 다리
 public class AnimeWorkService {
 
     @Autowired
@@ -29,5 +30,16 @@ public class AnimeWorkService {
     public List<SeichiPlaceVo> getPlacesByWorkId(int workId) {
         return mapper.selectPlacesByWorkId(workId);
     }
+    
+    //write_place
+    public void registerPlace(SeichiPlaceVo placeVo) {
+        mapper.insertSeichiPlace(placeVo);
+    }
+    
+    //viewdetail 
+    public SeichiPlaceVo getPlaceById(int id) {
+        return mapper.selectPlaceById(id);
+    }
+
 
 }
