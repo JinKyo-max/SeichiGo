@@ -1,6 +1,7 @@
 package com.seichigo.service;
 
 import com.seichigo.domain.AnimeWorkVo;
+import com.seichigo.domain.SeichiPlaceVo;
 import com.seichigo.mapper.AnimeWorkMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
